@@ -52,7 +52,7 @@ passport.use(new jwtStrategy(
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-//Some Comment by Aamir Merge Conflict
+//Some Comment by Aamir Another Channge
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
