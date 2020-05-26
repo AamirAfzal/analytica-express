@@ -11,17 +11,21 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/login',(req,res,next) => {
-  passport.authenticate("local",{session:false}, (err,user,info) => {
+  passport.authenticate(["jwt","local"],{session:false}, (err,user,info) => {
     if (err|| !user) {
-      res.status(400).json({status:"FAIL",data: "An Error Occurred"});
+      res.status(400).json({status:"AUTH-FAILED",data: "An Error Occurred"});
+      return;
     }
     req.login(user,{session:false}, err => {
       if (err) {
-        res.status(401).json({status:"FAIL",data:err});
+        res.status(401).json({status:"AUTH-FAILED",data:err});
+        return;
       }
     });
     const token = jwt.sign(user.toJSON(),'abc123');
-    return res.json({status: "OK",jwtToken:token,data:"Login Successful!"});
+    var JUser = user.toJSON();
+    delete JUser.password;
+    return res.json({status: "OK",jwtToken:token,data:"Login Successful!",user: JUser});
   })(req,res);
 });
 
@@ -30,10 +34,14 @@ router.post('/register', (req,res,next) => {
     req.body.password = passwordHash.generate(req.body.password);
     console.log(mongoose.connection.readyState);
     User.create(req.body)
-    .then(result => res.json({'status':'OK',data:result}),err => res.json({status:"FAIL",data:JSON.stringify(err)}))
+    .then(result => {
+      const token = jwt.sign(result.toJSON(),'abc123');
+      res.json({'status':'OK',data:{user: result, 'token':token}})
+    }
+      ),err => res.json({status:"FAIL",data:JSON.stringify(err)})
     .catch(error => res.json({status:"FAIL",data:error}));
   } catch (err) {
-    return res.json({status: "FAIL", data: err});
+    return res.json({status: "FAIL", data: err.toString()});
   }
 });
 module.exports = router;

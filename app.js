@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var passportLocal =require('passport-local').Strategy;
@@ -12,6 +13,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var passwordHash = require("password-hash");
 var User = require('./models/user');
+var cors = require('cors');
 var app = express();
 const connection = mongoose.connect("mongodb://localhost:27017/analytica",{useNewUrlParser: true, useUnifiedTopology: true});
 connection.then( db => {
@@ -40,7 +42,7 @@ passport.use(new passportLocal({
 
 //Configure JWT Strategy
 passport.use(new jwtStrategy(
-  {jwtFromRequest:jwtExtractor.fromBodyField("jwt"),secretOrKey:"abc123"},
+  {jwtFromRequest:jwtExtractor.fromBodyField("token"),secretOrKey:"abc123"},
   function (jwtPayload, cb) {
     return User.findOne({"_id": jwtPayload._id})
       .then (user => cb(null,user))
@@ -58,7 +60,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(cors())
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+app.use(bodyParser.json());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
