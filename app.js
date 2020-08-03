@@ -8,6 +8,7 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var passportLocal =require('passport-local').Strategy;
 var jwtStrategy = require('passport-jwt').Strategy;
+const DeviceRouter = require('./routes/device');
 var jwtExtractor = require('passport-jwt').ExtractJwt;
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -64,9 +65,11 @@ app.use(cors())
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+app.use(passport.initialize(),);
 app.use(bodyParser.json());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/device',passport.authenticate(['jwt'],{session:false}), DeviceRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
