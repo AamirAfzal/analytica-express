@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const passport = require('passport');
 const Device = require('../models/device');
 const Sensor = require("../models/sensor");
 const DataPoint = require('../models/dataPoint');
@@ -75,11 +74,11 @@ router.get('/:deviceid/sensor/:sensorid/limit/:limit', async (req, res) => {
         let deviceId = req.params.deviceid;
 
         //Get Device information
-        let device = await Device.findOne({ user: req.user._id, id: deviceId });
+        let device = await Device.findOne({ user: req.user._id, _id: deviceId });
         if (!device) res.json({ success: false, message: `Device not found with ID ${deviceID}` });
 
         //Get Sensor Info
-        let sensor = await Sensor.findOne({ device: device._id, id: req.params.sensorid });
+        let sensor = await Sensor.findOne({ device: device._id, _id: req.params.sensorid });
         if (!sensor) res.json({ success: false, message: `Sensor not found with ID ${req.params.sensorid}` });
 
         let data = await DataPoint.find({ sensor: sensor._id }).sort({ time: -1 }).limit(limit);
@@ -118,11 +117,11 @@ router.get('/:deviceid/sensor/:sensorid/days/:days', async (req, res) => {
         let deviceId = req.params.deviceid;
 
         //Get Device information
-        let device = await Device.findOne({ user: req.user._id, id: deviceId });
+        let device = await Device.findOne({ user: req.user._id, _id: deviceId });
         if (!device) res.json({ success: false, message: `Device not found with ID ${deviceID}` });
 
         //Get Sensor Info
-        let sensor = await Sensor.findOne({ device: device._id, id: req.params.sensorid });
+        let sensor = await Sensor.findOne({ device: device._id, _id: req.params.sensorid });
         if (!sensor) res.json({ success: false, message: `Sensor not found with ID ${req.params.sensorid}` });
 
         let cutoffDate = new Date();
@@ -294,7 +293,7 @@ router.post('/updatedata', async (req, res) => {
         let errors = [];
         req.body.data.forEach((dataPoint, i) => {
             if (!dataPoint.sensor) errors.push(`Sensor ID required for Data at Index ${i}`);
-            if (!dataPoint.value) errors.push(`Sensor data missing for Data at Index ${i}`);
+            if (!dataPoint.value && dataPoint.value !== 0) errors.push(`Sensor data missing for Data at Index ${i}`);
         });
 
         //Check if sensor exists
@@ -318,6 +317,7 @@ router.post('/updatedata', async (req, res) => {
             promises.push(DataPoint.create({
                 value: dataPoint.value,
                 sensor: SolvedPromises[i]._id,
+                time: dataPoint.time || Date.now(),
             }));
         });
         SolvedPromises = await Promise.all(promises);
