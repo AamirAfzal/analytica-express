@@ -126,6 +126,9 @@ router.post('/chart/:type/:device/:sensor/:days?', async (req, res) => {
                 stroke : {      
                     curve:'straight',
                 },
+                xaxis : {
+                    type: req.params.type == 'line'?'datetime':'category',
+                },
                 theme: {
                     palette: `pallete${parseInt(Math.random()*10%10 + 1)}`
                 }

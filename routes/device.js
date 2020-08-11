@@ -33,7 +33,7 @@ router.get('/:deviceid', async (req, res) => {
 
         //Get Device information
         let device = await Device.findOne({ user: req.user._id, id: deviceId });
-        if (!device) res.json({ success: false, message: `Device not found with ID ${deviceID}` });
+        if (!device) res.json({ success: false, message: `Device not found with ID ${deviceId}` });
 
         let sensors = await Sensor.find({ device: device._id });
         let data = sensors.map(sensor => DataPoint.find({ sensor: sensor._id }).sort({ time: -1 }).limit(1));
