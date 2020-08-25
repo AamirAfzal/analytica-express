@@ -70,7 +70,7 @@ app.use(bodyParser.urlencoded({
 app.use(passport.initialize(),);
 app.use(bodyParser.json());
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/users',passport.authenticate(['jwt'], { session: false }), usersRouter);
 app.use('/device', passport.authenticate(['jwt'], { session: false }), DeviceRouter);
 app.use('/dashboard', passport.authenticate(['jwt'], { session: false }), DashboardRouter);
 

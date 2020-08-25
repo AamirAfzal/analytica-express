@@ -44,4 +44,5 @@ router.post('/register', (req,res,next) => {
     return res.json({status: "FAIL", data: err.toString()});
   }
 });
+
 module.exports = router;
